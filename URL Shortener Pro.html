@@ -406,15 +406,4 @@
         function save() {
             localStorage.setItem('pro_links_final', JSON.stringify(links));
             localStorage.setItem('pro_files_final', JSON.stringify(files));
-            render();
-        }
-
-        function share() {
-            const u = document.getElementById('finalLink').innerText;
-            if(navigator.share) navigator.share({title: 'Shared Link', url: u}); else copy();
-        }
-
-        render();
-    </script>
-</body>
-</html>
+     
