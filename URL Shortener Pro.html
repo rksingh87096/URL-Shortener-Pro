@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Pro | Rahul Kumar Singh</title>
+    <!-- Premium Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #050507;
+            --card: rgba(20, 20, 23, 0.95);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --danger: #ff4757;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0, transparent 50%);
+        }
+
+        .main-container { width: 100%; max-width: 500px; z-index: 10; }
+
+        /* --- PRO HEADER (Logo Straightened) --- */
+        header { text-align: center; margin-bottom: 45px; }
+        .logo-box {
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 25px; font-size: 1.8rem; box-shadow: 0 10px 30px var(--accent-glow);
+            position: relative; /* Tilt (rotate) removed here */
+        }
+        .logo-box::after {
+            content: ''; position: absolute; width: 100%; height: 100%; border-radius: 20px;
+            border: 1px solid var(--accent); animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+
+        .pro-title {
+            font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800;
+            letter-spacing: -1px; margin: 0; color: #fff;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .pro-badge {
+            font-size: 0.7rem; background: linear-gradient(135deg, #ff9f43, #ff6b6b);
+            color: white; padding: 4px 10px; border-radius: 50px; letter-spacing: 1px; font-weight: 900;
+        }
+
+        .trust-bar {
+            font-size: 0.75rem; color: var(--success); font-weight: 700;
+            letter-spacing: 2px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .trust-bar span { color: var(--text-dim); font-weight: 400; }
+
+        .brand-signature { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; }
+        .line { width: 40px; height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2)); }
+        .line-rev { background: linear-gradient(to left, transparent, rgba(255,255,255,0.2)); }
+        .brand-text { font-size: 0.65rem; font-weight: 600; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin: 0; }
+
+        /* --- ACTION PANEL --- */
+        .glass-panel {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 30px; padding: 30px; backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .switcher {
+            display: flex; background: rgba(0,0,0,0.4);
+            padding: 6px; border-radius: 16px; margin-bottom: 25px;
+        }
+        .switch-btn {
+            flex: 1; padding: 12px; border: none; background: transparent;
+            color: var(--text-dim); font-weight: 600; cursor: pointer;
+            border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .switch-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
+
+        input {
+            width: 100%; padding: 18px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border); border-radius: 16px;
+            color: #fff; font-size: 1rem; outline: none; margin-bottom: 20px;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+
+        .btn-action {
+            width: 100%; padding: 18px; border-radius: 16px; border: none;
+            background: linear-gradient(135deg, var(--accent), #4f46e5);
+            color: white; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border); border-radius: 20px;
+            padding: 40px 20px; text-align: center; cursor: pointer; margin-bottom: 20px;
+        }
+
+        /* --- RESULT AREA --- */
+        #resultArea {
+            margin-top: 30px; padding: 25px; border-radius: 25px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent);
+            display: none; text-align: center; animation: zoomIn 0.4s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } }
+
+        #qr-box { background: #fff; padding: 15px; border-radius: 20px; display: inline-block; margin-bottom: 20px; }
+        #qrcode canvas, #qrcode img { margin: 0 auto; max-width: 150px; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-small {
+            padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        /* --- HISTORY SECTION --- */
+        .history-section { margin-top: 35px; }
+        .history-head { display: flex; justify-content: space-between; color: var(--text-dim); margin-bottom: 15px; font-size: 0.85rem; font-weight: 700; }
+        
+        .history-item {
+            background: var(--card); border: 1px solid var(--border);
+            padding: 15px; border-radius: 18px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } }
+        .history-item.removing { transform: translateX(50px); opacity: 0; }
+
+        .history-item a { color: var(--accent); text-decoration: none; max-width: 65%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; }
+        .delete-single { color: var(--text-dim); cursor: pointer; font-size: 0.9rem; }
+        .delete-single:hover { color: var(--danger); transform: scale(1.2); }
+
+        /* --- DASHBOARD COUNTERS --- */
+        .stats-dashboard { margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            padding: 20px; border-radius: 24px; text-align: center; border-bottom: 3px solid var(--accent);
+        }
+        .stat-val { display: block; font-size: 1.6rem; font-weight: 800; color: #fff; }
+        .stat-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; }
+
+        /* --- FOOTER SECTION --- */
+        .footer { text-align: center; margin-top: 50px; padding-top: 25px; border-top: 1px solid var(--border); }
+        .dev-name { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
+        .copyright { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 20px; }
+        .follow-tag { font-size: 0.85rem; color: var(--accent); margin-bottom: 18px; font-weight: 800; letter-spacing: 2px; }
+
+        .social-box { display: flex; justify-content: center; gap: 15px; padding-bottom: 40px; }
+        .social-item {
+            width: 45px; height: 45px; border-radius: 12px;
+            background: var(--card); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim); text-decoration: none; font-size: 1.2rem;
+        }
+        .social-item:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-3px); }
+
+        /* --- PRO NOTIFICATIONS --- */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: white; color: black; padding: 12px 30px;
+            border-radius: 50px; font-weight: 800; display: none; z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- PRO HEADER -->
+        <header>
+            <div class="logo-box"><i class="fas fa-bolt-lightning"></i></div>
+            <h1 class="pro-title">URL Shortener <span class="pro-badge">PRO</span></h1>
+            <div class="trust-bar">SECURE <span>•</span> FAST <span>•</span> RELIABLE</div>
+            <div class="brand-signature">
+                <div class="line"></div>
+                <p class="brand-text">Technology by Rahul Kumar Singh</p>
+                <div class="line line-rev"></div>
+            </div>
+        </header>
+
+        <!-- ACTION PANEL -->
+        <div class="glass-panel">
+            <div class="switcher">
+                <button class="switch-btn active" id="tabL" onclick="switchTab('link')"><i class="fas fa-link"></i> LINKS</button>
+                <button class="switch-btn" id="tabF" onclick="switchTab('file')"><i class="fas fa-cloud"></i> FILES</button>
+            </div>
+
+            <div id="viewL">
+                <input type="url" id="urlInput" placeholder="https://paste-long-link-here.com">
+                <button class="btn-action" onclick="shorten()"><i class="fas fa-magic" id="urlIcon"></i> <span id="urlBtnText">Generate Short Link</span></button>
+            </div>
+
+            <div id="viewF" style="display: none;">
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 10px;"></i>
+                    <p id="fileMsg" style="font-size: 0.9rem;">Tap to select file</p>
+                    <input type="file" id="fileInput" hidden onchange="handleFile()">
+                </div>
+                <button class="btn-action" onclick="upload()"><i class="fas fa-shield-halved"></i> Upload to Cloud</button>
+            </div>
+
+            <div id="resultArea">
+                <div id="qr-box"><div id="qrcode"></div></div>
+                <a href="#" id="finalLink" target="_blank" style="display:block; color:var(--accent); font-weight:800; text-decoration:none; margin-bottom: 20px; word-break: break-all;"></a>
+                <div class="btn-group">
+                    <button class="btn-small" onclick="copy()"><i class="fas fa-copy"></i> Copy</button>
+                    <button class="btn-small" onclick="share()"><i class="fas fa-share-nodes"></i> Share</button>
+                    <button class="btn-action" style="grid-column: span 2; margin-top: 10px;" onclick="downloadQR()"><i class="fas fa-download"></i> Download QR Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY SECTION -->
+        <div class="history-section">
+            <div class="history-head">
+                <span id="histTitle">RECENT LINKS</span>
+                <i class="fas fa-trash-can" style="cursor:pointer; color: var(--danger);" onclick="clearAll()"></i>
+            </div>
+            <div id="historyList"></div>
+        </div>
+
+        <!-- DASHBOARD COUNTERS -->
+        <div class="stats-dashboard">
+            <div class="stat-card">
+                <span class="stat-val" id="cLinks">0</span>
+                <span class="stat-label">Total Links</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val" id="cFiles">0</span>
+                <span class="stat-label">Total Files</span>
+            </div>
+        </div>
+
+        <!-- FOOTER SECTION -->
+        <div class="footer">
+            <div class="dev-name">Developer by Rahul Kumar Singh</div>
+            <div class="copyright">© 2026 All Rights Reserved | Secure • Fast • Reliable</div>
+            <div class="follow-tag">FOLLOW ME ✨</div>
+            <div class="social-box">
+                <a href="https://instagram.com/rk_singh_1920_" target="_blank" class="social-item"><i class="fab fa-instagram"></i></a>
+                <a href="https://t.me/allmodapk1920" target="_blank" class="social-item"><i class="fab fa-telegram"></i></a>
+                <a href="https://youtube.com/@rkmusic9576" target="_blank" class="social-item"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Notification</div>
+
+    <script>
+        let mode = 'link';
+        let links = JSON.parse(localStorage.getItem('pro_links_final')) || [];
+        let files = JSON.parse(localStorage.getItem('pro_files_final')) || [];
+
+        function switchTab(m) {
+            mode = m;
+            document.getElementById('viewL').style.display = m === 'link' ? 'block' : 'none';
+            document.getElementById('viewF').style.display = m === 'file' ? 'block' : 'none';
+            document.getElementById('tabL').classList.toggle('active', m === 'link');
+            document.getElementById('tabF').classList.toggle('active', m === 'file');
+            document.getElementById('histTitle').innerText = m === 'link' ? 'RECENT LINKS' : 'RECENT FILES';
+            document.getElementById('resultArea').style.display = 'none';
+            render();
+        }
+
+        function handleFile() {
+            const f = document.getElementById('fileInput').files[0];
+            if(f) document.getElementById('fileMsg').innerText = f.name;
+        }
+
+        async function shorten() {
+            const val = document.getElementById('urlInput').value;
+            if(!val) return notify("Please enter a URL!");
+            
+            const btn = document.querySelector('#viewL .btn-action');
+            const icon = document.getElementById('urlIcon');
+            const text = document.getElementById('urlBtnText');
+
+            // Start Loading
+            btn.disabled = true;
+            icon.className = "fas fa-spinner fa-spin";
+            text.innerText = "Generating...";
+
+            try {
+                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(val)}`);
+                const short = await res.text();
+                showResult(short);
+                links.unshift({url: short, id: Date.now()});
+                save();
+            } catch(e) { 
+                notify("API Error!"); 
+            } finally {
+                // Stop Loading
+                btn.disabled = false;
+                icon.className = "fas fa-magic";
+                text.innerText = "Generate Short Link";
+            }
+        }
+
+        async function upload() {
+            const f = document.getElementById('fileInput').files[0];
+            if(!f) return notify("Select a file!");
+            const btn = document.querySelector('#viewF .btn-action');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading...`;
+            try {
+                const fd = new FormData(); fd.append('file', f);
+                const res = await fetch('https://tmpfiles.org/api/v1/upload', {method: 'POST', body: fd});
+                const json = await res.json();
+                const dl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                showResult(dl);
+                files.unshift({url: dl, name: f.name, id: Date.now()});
+                save();
+            } catch(e) { notify("Upload Failed!"); }
+            btn.innerHTML = `<i class="fas fa-shield-halved"></i> Upload to Cloud`;
+        }
+
+        function showResult(url) {
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('finalLink').innerText = url;
+            document.getElementById('finalLink').href = url;
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById('qrcode'), { text: url, width: 150, height: 150 });
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function render() {
+            const list = document.getElementById('historyList');
+            const data = mode === 'link' ? links : files;
+            document.getElementById('cLinks').innerText = links.length;
+            document.getElementById('cFiles').innerText = files.length;
+            
+            list.innerHTML = data.slice(0, 5).map((item, index) => `
+                <div class="history-item" id="item-${item.id}">
+                    <a href="${item.url}" target="_blank">${mode === 'link' ? item.url : item.name}</a>
+                    <i class="fas fa-trash-alt delete-single" onclick="deleteSingle(${index})"></i>
+                </div>
+            `).join('') || `<p style="text-align:center; color:#444; font-size:0.8rem; margin-top:10px;">No History Available</p>`;
+        }
+
+        function deleteSingle(index) {
+            const data = mode === 'link' ? links : files;
+            const item = document.getElementById(`item-${data[index].id}`);
+            item.classList.add('removing');
+            setTimeout(() => {
+                data.splice(index, 1);
+                save();
+                notify("Item Deleted! 🗑️");
+            }, 300);
+        }
+
+        function clearAll() {
+            if(confirm("Delete all history?")) {
+                if(mode === 'link') links = []; else files = [];
+                save();
+                notify("History Cleared! 🔥");
+            }
+        }
+
+        function copy() {
+            const url = document.getElementById('finalLink').innerText;
+            navigator.clipboard.writeText(url);
+            notify("Link Copied! 📋");
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if(!canvas) return;
+            const tempCanvas = document.createElement('canvas');
+            const padding = 60;
+            tempCanvas.width = canvas.width + padding;
+            tempCanvas.height = canvas.height + padding;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0,0, tempCanvas.width, tempCanvas.height);
+            ctx.drawImage(canvas, padding/2, padding/2);
+            const link = document.createElement('a');
+            link.download = `QR_RahulSingh_${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL();
+            link.click();
+            notify("QR Downloaded! ✅");
+        }
+
+        function notify(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        function save() {
+            localStorage.setItem('pro_links_final', JSON.stringify(links));
+            localStorage.setItem('pro_files_final', JSON.stringify(files));
+            render();
+        }
+
+        function share() {
+            const u = document.getElementById('finalLink').innerText;
+            if(navigator.share) navigator.share({title: 'Shared Link', url: u}); else copy();
+        }
+
+        render();
+    </script>
+</body>
+</html>
